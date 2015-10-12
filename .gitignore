@@ -1,1 +1,4 @@
 /goof
+
+/vendor/*
+!/vendor/*.md5
