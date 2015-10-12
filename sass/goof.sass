@@ -1,0 +1,14 @@
+.calendar-name::before
+  width: 15px;
+  height: 15px;
+  display: inline-block;
+  border-radius: 2px;
+  margin-right: 5px;
+  content: "";
+  vertical-align: middle;
+
+$palette: "#5da5da" "#4d4d4d" "#faa43a" "#60bd68" "#f17cb0" "#b2912f" "#b276b2" "#decf3f" "#f15854";
+
+@for $i from 1 through length($palette)
+  .calendar-name-#{$i}::before
+    background-color: #{nth($palette, $i)};

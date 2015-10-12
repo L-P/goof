@@ -1,4 +1,6 @@
 /goof
 
+/static/sass/*
+!/static/sass/empty
 /vendor/*
 !/vendor/*.md5
