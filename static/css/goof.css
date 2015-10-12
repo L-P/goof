@@ -1,17 +1,19 @@
-.calendar-icon {
-    height: 15px;
+.calendar-name::before {
     width: 15px;
+    height: 15px;
     display: inline-block;
     border-radius: 2px;
+    margin-right: 5px;
+    content: "";
     vertical-align: middle;
 }
 
-.palette-0 { background-color: #5da5da; }
-.palette-1 { background-color: #4d4d4d; }
-.palette-2 { background-color: #faa43a; }
-.palette-3 { background-color: #60bd68; }
-.palette-4 { background-color: #f17cb0; }
-.palette-5 { background-color: #b2912f; }
-.palette-6 { background-color: #b276b2; }
-.palette-7 { background-color: #decf3f; }
-.palette-8 { background-color: #f15854; }
+.calendar-name-palette-0::before { background-color: #5da5da; }
+.calendar-name-palette-1::before { background-color: #4d4d4d; }
+.calendar-name-palette-2::before { background-color: #faa43a; }
+.calendar-name-palette-3::before { background-color: #60bd68; }
+.calendar-name-palette-4::before { background-color: #f17cb0; }
+.calendar-name-palette-5::before { background-color: #b2912f; }
+.calendar-name-palette-6::before { background-color: #b276b2; }
+.calendar-name-palette-7::before { background-color: #decf3f; }
+.calendar-name-palette-8::before { background-color: #f15854; }
