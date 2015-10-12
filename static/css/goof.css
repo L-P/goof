@@ -1,0 +1,17 @@
+.calendar-icon {
+    height: 15px;
+    width: 15px;
+    display: inline-block;
+    border-radius: 2px;
+    vertical-align: middle;
+}
+
+.palette-0 { background-color: #5da5da; }
+.palette-1 { background-color: #4d4d4d; }
+.palette-2 { background-color: #faa43a; }
+.palette-3 { background-color: #60bd68; }
+.palette-4 { background-color: #f17cb0; }
+.palette-5 { background-color: #b2912f; }
+.palette-6 { background-color: #b276b2; }
+.palette-7 { background-color: #decf3f; }
+.palette-8 { background-color: #f15854; }

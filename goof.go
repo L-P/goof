@@ -9,14 +9,8 @@ import (
 )
 
 func handler(c web.C, w http.ResponseWriter, r *http.Request) {
-	t := template.Must(template.ParseFiles("templates/index.html"))
-	data := struct {
-		Title string
-	}{
-		"goof",
-	}
-
-	t.Execute(w, data)
+	t := template.Must(template.ParseGlob("templates/*.html"))
+	t.ExecuteTemplate(w, "index", struct{}{})
 }
 
 func main() {
