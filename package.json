@@ -1,0 +1,11 @@
+{
+    "name": "goof",
+    "description": "CardDAV/CalDAV web client.",
+    "author": "Léo Peltier <contact@leo-peltier.fr>",
+    "dependencies": {
+        "bower": "^1.5.3",
+        "node-sass": "^3.3.3"
+    },
+    "private": true,
+    "license": "UNLICENSED"
+}

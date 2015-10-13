@@ -1,6 +1,6 @@
 /goof
 
+/bower_components
+/node_modules
 /static/sass/*
 !/static/sass/empty
-/vendor/*
-!/vendor/*.md5
