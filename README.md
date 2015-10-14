@@ -7,12 +7,10 @@ the Makefile.
 
 Versions used during development:
 ```shell
-$ go version
-go version go1.5.1 linux/amd64
-$ node --version
-v0.10.25
-$ npm --version
-1.4.21
+$ make version
+go    version  go1.5.1   linux/amd64
+node  version  v0.10.25
+npm   version  1.4.21
 ```
 
 ### Building

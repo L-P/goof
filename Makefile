@@ -36,14 +36,11 @@ watch:
 	$(SASS) --watch --output-style compressed -r sass -o static/sass
 
 version:
-	@echo \$$ go version
-	@go version
-
-	@echo \$$ node --version
-	@node --version
-
-	@echo \$$ npm --version
-	@npm --version
+	@( \
+		go version \
+		&& echo -n "node version " && node --version \
+		&& echo -n "npm version " && npm --version \
+	) | column -t
 
 $(SASS_COMPILED): $(SASS_SRC)
 	$(SASS) --output-style compressed -r sass -o static/sass
