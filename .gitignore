@@ -1,6 +1,7 @@
 /cli/cli
 /gui/gui
 
+/*.ics
 /bower_components
 /node_modules
 /static/sass/*
