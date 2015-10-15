@@ -9,7 +9,7 @@ import (
 	"github.com/zenazn/goji"
 	"github.com/zenazn/goji/web"
 
-	"./calendar"
+	"../calendar"
 )
 
 func handler(c web.C, w http.ResponseWriter, r *http.Request) {

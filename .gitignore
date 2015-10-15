@@ -1,5 +1,5 @@
-/goof
-/gin-bin
+/cli/cli
+/gui/gui
 
 /bower_components
 /node_modules

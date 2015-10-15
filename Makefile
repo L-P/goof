@@ -23,10 +23,13 @@ BOWER_COMPONENTS=$(JQUERY_FILE) $(BOOTSTRAP_FILES)
 SASS_SRC=$(shell find sass -type f -name "*.sass")
 SASS_COMPILED=$(addsuffix .css,$(addprefix static/,$(basename $(SASS_SRC))))
 
-all: $(NODE_MODULES) $(BOWER_COMPONENTS) $(SASS_COMPILED) goof
+all: $(NODE_MODULES) $(BOWER_COMPONENTS) $(SASS_COMPILED) gui/gui cli/cli
 
-goof: $(shell find . -type f -name "*.go")
-	go build
+gui/gui: $(shell find gui -type f -name "*.go")
+	cd gui && go build
+
+cli/cli: $(shell find cli -type f -name "*.go")
+	cd cli && go build
 
 .PHONY: clean watch version
 clean:
