@@ -2,7 +2,7 @@ PREREQUISITES = go npm
 _ := $(foreach exec,$(PREREQUISITES),\
 	$(if $(shell which $(exec)),_,$(error "$(exec) not found in $$PATH.")))
 
-PACKAGES=calendar keyvalue
+PACKAGES=calendar
 
 SASS=node_modules/node-sass/bin/node-sass
 BOWER=node_modules/bower/bin/bower

@@ -1,4 +1,4 @@
-package keyvalue
+package calendar
 
 import (
 	"bufio"
@@ -6,11 +6,11 @@ import (
 	"strings"
 )
 
-type Reader struct {
+type Scanner struct {
 	scanner *bufio.Scanner
 }
 
-func (r *Reader) Next() (key string, value string, err error) {
+func (r *Scanner) Next() (key string, value string, err error) {
 	for r.scanner.Scan() {
 		line := r.scanner.Text()
 		err = r.scanner.Err()
@@ -35,7 +35,7 @@ func (r *Reader) Next() (key string, value string, err error) {
 	return
 }
 
-func NewReader(file *os.File) (reader Reader) {
+func NewScanner(file *os.File) (reader Scanner) {
 	reader.scanner = bufio.NewScanner(file)
 	return
 }

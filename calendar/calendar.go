@@ -5,8 +5,6 @@ import (
 	"io"
 	"os"
 	"time"
-
-	"../keyvalue"
 )
 
 type Calendar struct {
@@ -25,7 +23,7 @@ type Event struct {
 }
 
 func FromFile(file *os.File) (calendar Calendar, err error) {
-	reader := keyvalue.NewReader(file)
+	reader := NewScanner(file)
 	var key, value string
 
 	for err == nil {
