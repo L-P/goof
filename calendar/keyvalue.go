@@ -10,29 +10,40 @@ type Scanner struct {
 	scanner *bufio.Scanner
 }
 
-func (r *Scanner) Next() (key string, value string, err error) {
+func (r *Scanner) Scan() bool {
 	for r.scanner.Scan() {
-		line := r.scanner.Text()
-		err = r.scanner.Err()
-
-		splits := strings.SplitN(line, ":", 2)
-		switch len(splits) {
-		case 0:
-			continue
-		case 1:
-			key = splits[0]
-			value = ""
-			return
-		case 2:
-			key = splits[0]
-			value = splits[1]
-			return
-		default:
-			panic("unreachable")
+		if strings.Index(r.scanner.Text(), ":") != -1 {
+			return true
 		}
 	}
 
+	return false
+}
+
+func (r *Scanner) KeyValue() (key string, value string) {
+	line := r.scanner.Text()
+
+	splits := strings.SplitN(line, ":", 2)
+	switch len(splits) {
+	case 1:
+		key = splits[0]
+		value = ""
+		return
+	case 2:
+		key = splits[0]
+		value = splits[1]
+		return
+	case 0:
+		fallthrough
+	default:
+		panic("unreachable")
+	}
+
 	return
+}
+
+func (r *Scanner) Err() error {
+	return r.scanner.Err()
 }
 
 func NewScanner(file *os.File) (reader Scanner) {
