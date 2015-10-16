@@ -2,14 +2,16 @@ package calendar
 
 import (
 	"bufio"
-	"os"
+	"io"
 	"strings"
 )
 
+// Scanner reads a io.Reader line by line and tokenise it by key/value.
 type Scanner struct {
 	scanner *bufio.Scanner
 }
 
+// Scan parses the next line from the io.Reader.
 func (r *Scanner) Scan() bool {
 	for r.scanner.Scan() {
 		if strings.Index(r.scanner.Text(), ":") != -1 {
@@ -20,6 +22,7 @@ func (r *Scanner) Scan() bool {
 	return false
 }
 
+// KeyValue returns the key/value present on the current line.
 func (r *Scanner) KeyValue() (key string, value string) {
 	line := r.scanner.Text()
 
@@ -46,7 +49,7 @@ func (r *Scanner) Err() error {
 	return r.scanner.Err()
 }
 
-func NewScanner(file *os.File) (reader Scanner) {
-	reader.scanner = bufio.NewScanner(file)
+func NewScanner(reader io.Reader) (scanner Scanner) {
+	scanner.scanner = bufio.NewScanner(reader)
 	return
 }

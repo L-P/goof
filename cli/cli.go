@@ -17,7 +17,7 @@ func main() {
 		panic(err)
 	}
 
-	cal, err := calendar.FromFile(ics)
+	cal, err := calendar.FromReader(ics)
 	if err != nil {
 		panic(err)
 	}

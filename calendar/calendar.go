@@ -2,14 +2,16 @@ package calendar
 
 import (
 	"errors"
-	"os"
+	"io"
 	"time"
 )
 
+// An Event is an ICS VCALENDAR.
 type Calendar struct {
 	Events []Event
 }
 
+// An Event is an ICS VEVENT.
 type Event struct {
 	Summary     string
 	Description string
@@ -25,8 +27,9 @@ const (
 	STATE_PARSE_EVENT
 )
 
-func FromFile(file *os.File) (calendar Calendar, err error) {
-	scanner := NewScanner(file)
+// FromFile reads an .ics file and create a Calendar filled with Events.
+func FromReader(reader io.Reader) (calendar Calendar, err error) {
+	scanner := NewScanner(reader)
 	var (
 		state int = STATE_INIT
 		event Event
@@ -76,6 +79,8 @@ loop:
 	return
 }
 
+// UpdateFromIcsProperty sets an event property from a key/value pair read from
+// an .ics file.
 func (e *Event) UpdateFromIcsProperty(name string, value string) {
 	// TODO
 }
