@@ -140,7 +140,6 @@ func parseTime(line ics.Line) time.Time {
 		parsed, err = time.Parse("20060102", line.Value)
 	} else if line.Value[len(line.Value)-1] == 'Z' {
 		parsed, err = time.Parse("20060102T150405Z", line.Value)
-		parsed = parsed.In(loc)
 	} else {
 		parsed, err = time.ParseInLocation("20060102T150405", line.Value, loc)
 	}
@@ -149,5 +148,5 @@ func parseTime(line ics.Line) time.Time {
 		panic(err)
 	}
 
-	return parsed
+	return parsed.In(loc)
 }
