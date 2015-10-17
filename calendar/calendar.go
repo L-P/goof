@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"errors"
 	"io"
+	"sort"
 	"time"
 
 	"./ics"
@@ -37,12 +38,17 @@ func FromReader(reader io.Reader) (calendar Calendar, err error) {
 	scanner := bufio.NewScanner(reader)
 	var (
 		state int = STATE_INIT
+		line  ics.Line
 		event Event
 	)
 
 loop:
 	for scanner.Scan() {
-		line := ics.NewLine(scanner.Text())
+		line, err = ics.NewLine(scanner.Text())
+
+		if err != nil {
+			return
+		}
 
 		switch state {
 		case STATE_INIT:
@@ -81,10 +87,52 @@ loop:
 		err = scanner.Err()
 	}
 
+	sort.Sort(ByTime(calendar.Events))
+
 	return
 }
 
 // UpdateFromIcsProperty sets an event property from an ICS line.
 func (e *Event) UpdateFromIcsLine(line ics.Line) {
-	// TODO
+	switch line.Property {
+	case "DTSTART":
+		e.Time = parseTime(line)
+	case "SUMMARY":
+		e.Summary = line.Value
+	case "DESCRIPTION":
+		e.Description = line.Value
+	}
+}
+
+type ByTime []Event
+
+func (t ByTime) Len() int {
+	return len(t)
+}
+
+func (t ByTime) Swap(i, j int) {
+	t[i], t[j] = t[j], t[i]
+}
+
+func (t ByTime) Less(i, j int) bool {
+	return t[i].Time.Unix() < t[j].Time.Unix()
+}
+
+func parseTime(line ics.Line) time.Time {
+	valueType, prs := line.Parameters["VALUE"]
+	var parsed time.Time
+	var err error
+
+	if prs && valueType == "DATE" {
+		parsed, err = time.Parse("20060102", line.Value)
+	} else if line.Value[len(line.Value)-1] == 'Z' {
+		parsed, err = time.Parse("20060102T150405Z", line.Value)
+	} else {
+		parsed, err = time.Parse("20060102T150405", line.Value)
+	}
+
+	if err != nil {
+		panic(err)
+	}
+	return parsed
 }
