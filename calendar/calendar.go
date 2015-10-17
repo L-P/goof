@@ -21,7 +21,7 @@ type Event struct {
 	Summary     string
 	Description string
 	UID         string
-	Time        time.Time
+	Start       time.Time
 	Duration    time.Duration
 }
 
@@ -87,7 +87,7 @@ loop:
 		err = scanner.Err()
 	}
 
-	sort.Sort(ByTime(calendar.Events))
+	sort.Sort(ByStart(calendar.Events))
 
 	return
 }
@@ -96,7 +96,7 @@ loop:
 func (e *Event) UpdateFromIcsLine(line ics.Line) {
 	switch line.Property {
 	case "DTSTART":
-		e.Time = parseTime(line)
+		e.Start = parseTime(line)
 	case "SUMMARY":
 		e.Summary = line.Value
 	case "DESCRIPTION":
@@ -104,20 +104,6 @@ func (e *Event) UpdateFromIcsLine(line ics.Line) {
 	case "UID":
 		e.UID = line.Value
 	}
-}
-
-type ByTime []Event
-
-func (t ByTime) Len() int {
-	return len(t)
-}
-
-func (t ByTime) Swap(i, j int) {
-	t[i], t[j] = t[j], t[i]
-}
-
-func (t ByTime) Less(i, j int) bool {
-	return t[i].Time.Unix() < t[j].Time.Unix()
 }
 
 func parseTime(line ics.Line) time.Time {
@@ -149,4 +135,18 @@ func parseTime(line ics.Line) time.Time {
 	}
 
 	return parsed.In(loc)
+}
+
+type ByStart []Event
+
+func (t ByStart) Len() int {
+	return len(t)
+}
+
+func (t ByStart) Swap(i, j int) {
+	t[i], t[j] = t[j], t[i]
+}
+
+func (t ByStart) Less(i, j int) bool {
+	return t[i].Start.Unix() < t[j].Start.Unix()
 }
