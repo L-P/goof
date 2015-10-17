@@ -101,6 +101,8 @@ func (e *Event) UpdateFromIcsLine(line ics.Line) {
 		e.Summary = line.Value
 	case "DESCRIPTION":
 		e.Description = line.Value
+	case "UID":
+		e.UID = line.Value
 	}
 }
 
@@ -119,20 +121,33 @@ func (t ByTime) Less(i, j int) bool {
 }
 
 func parseTime(line ics.Line) time.Time {
-	valueType, prs := line.Parameters["VALUE"]
-	var parsed time.Time
-	var err error
+	valueType, _ := line.Parameters["VALUE"]
+	valueTz, hasTz := line.Parameters["TZID"]
 
-	if prs && valueType == "DATE" {
+	var (
+		parsed time.Time
+		loc    *time.Location
+		err    error
+	)
+
+	if hasTz {
+		loc, _ = time.LoadLocation(valueTz)
+	} else {
+		loc, _ = time.LoadLocation("Europe/Paris")
+	}
+
+	if valueType == "DATE" {
 		parsed, err = time.Parse("20060102", line.Value)
 	} else if line.Value[len(line.Value)-1] == 'Z' {
 		parsed, err = time.Parse("20060102T150405Z", line.Value)
+		parsed = parsed.In(loc)
 	} else {
-		parsed, err = time.Parse("20060102T150405", line.Value)
+		parsed, err = time.ParseInLocation("20060102T150405", line.Value, loc)
 	}
 
 	if err != nil {
 		panic(err)
 	}
+
 	return parsed
 }
