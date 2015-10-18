@@ -6,44 +6,75 @@ import (
 	"time"
 )
 
+// Parameter is a parameter name. See RFC 5545 8.3.3.
+type Parameter string
+
+const (
+	ValueTypeParameter  Parameter = "VALUE"
+	TimezoneIDParameter           = "TZID"
+)
+
+// Values for ValueTypeParameter.
+const (
+	DateType     = "DATE"
+	DateTimeType = "DATE-TIME"
+)
+
+// Property is a property name. See RFC 5545 8.3.2.
+type Property string
+
+const (
+	BeginProperty         Property = "BEGIN"
+	EndProperty                    = "END"
+	VersionProperty                = "VERSION"
+	DateTimeStartProperty          = "DTSTART"
+	DateTimeEndProperty            = "DTEND"
+	SummaryProperty                = "SUMMARY"
+	DescriptionProperty            = "DESCRIPTION"
+	LocationProperty               = "LOCATION"
+	CreatedProperty                = "CREATED"
+	LastModifiedProperty           = "LAST-MODIFIED"
+	UIDProperty                    = "UID"
+	TransparentProperty            = "TRANSP"
+)
+
+// Values for TransparentProperty.
+const (
+	TransparentTransparency = "TRANSPARENT"
+	OpaqueTransparency      = "OPAQUE"
+)
+
+// Component is a component name. See RFC 5545 8.3.1.
+type Component string
+
+const (
+	CalendarComponent Component = "VCALENDAR"
+	EventComponent              = "VEVENT"
+	AlarmComponent              = "VALARM"
+	TimezoneComponent           = "VTIMEZONE"
+	JournalComponent            = "VJOURNAL"
+	TodoComponent               = "VTODO"
+	FreeBusyComponent           = "VFREEBUZY"
+)
+
 // Line contains the parsed data of a single line from an iCalendar file.
 // Every property and parameter names will be uppercased.
 type Line struct {
-	Property   string
-	Parameters map[string]string
+	Property   Property
+	Parameters map[Parameter]string
 	Value      string
 
 	original string
 }
 
-// BeginsCalendar returns true if the line is starting a new VCALENDAR.
-func (l Line) BeginsCalendar() bool {
-	return l.Property == "BEGIN" && l.Value == "VCALENDAR"
+// Begins returns true if the line is starting a new component.
+func (l Line) Begins(component Component) bool {
+	return l.Property == BeginProperty && l.Value == string(component)
 }
 
-// EndsCalendar returns true if the line is ending the current VCALENDAR.
-func (l Line) EndsCalendar() bool {
-	return l.Property == "END" && l.Value == "VCALENDAR"
-}
-
-// BeginsEvent returns true if the line is starting a new VEVENT.
-func (l Line) BeginsEvent() bool {
-	return l.Property == "BEGIN" && l.Value == "VEVENT"
-}
-
-// EndsEvent returns true if the line is ending the current VEVENT.
-func (l Line) EndsEvent() bool {
-	return l.Property == "END" && l.Value == "VEVENT"
-}
-
-// BeginsAlarm returns true if the line is starting a new VALARM.
-func (l Line) BeginsAlarm() bool {
-	return l.Property == "BEGIN" && l.Value == "VALARM"
-}
-
-// EndsAlarm returns true if the line is ending the current VALARM.
-func (l Line) EndsAlarm() bool {
-	return l.Property == "END" && l.Value == "VALARM"
+// Ends returns true if the line is ending the current component.
+func (l Line) Ends(component Component) bool {
+	return l.Property == EndProperty && l.Value == string(component)
 }
 
 func (l Line) String() string {
@@ -65,10 +96,10 @@ func NewLine(str string) (line Line) {
 
 // parseProperty parse the property name, its parameters and their
 // values from first part of an iCalendar line (before the first ':').
-func parseProperty(str string) (property string, parameters map[string]string) {
+func parseProperty(str string) (property Property, parameters map[Parameter]string) {
 	splits := strings.SplitN(str, ";", 2)
 
-	property = strings.ToUpper(splits[0])
+	property = Property(strings.ToUpper(splits[0]))
 	if len(splits) > 1 {
 		parameters = parsePropertyParameters(splits[1])
 	}
@@ -80,8 +111,8 @@ func parseProperty(str string) (property string, parameters map[string]string) {
 // from a string.
 // From the line "PROP;PARAM=VALUE;OTHER=VALUE", only pass the part
 // after "PROP;"
-func parsePropertyParameters(str string) (parameters map[string]string) {
-	parameters = make(map[string]string)
+func parsePropertyParameters(str string) (parameters map[Parameter]string) {
+	parameters = make(map[Parameter]string)
 	tuples := strings.Split(str, ";")
 	for _, tuple := range tuples {
 		splits := strings.SplitN(tuple, "=", 2)
@@ -89,7 +120,9 @@ func parsePropertyParameters(str string) (parameters map[string]string) {
 		if len(splits) > 1 {
 			value = splits[1]
 		}
-		parameters[strings.ToUpper(splits[0])] = value
+
+		name := Parameter(strings.ToUpper(splits[0]))
+		parameters[name] = value
 	}
 
 	return
@@ -100,14 +133,14 @@ func parsePropertyParameters(str string) (parameters map[string]string) {
 // parameter or UTC by default.
 // See RFC 5545 3.3.4. and 3.3.5.
 func (line Line) ParseAsTime() (parsed time.Time, err error) {
-	valueType, _ := line.Parameters["VALUE"]
+	valueType, _ := line.Parameters[ValueTypeParameter]
 
-	if valueType == "DATE" {
+	if valueType == DateType {
 		parsed, err = time.Parse("20060102", line.Value)
 	} else if line.Value[len(line.Value)-1] == 'Z' {
 		parsed, err = time.Parse("20060102T150405Z", line.Value)
 	} else {
-		valueTz, hasTz := line.Parameters["TZID"]
+		valueTz, hasTz := line.Parameters[TimezoneIDParameter]
 		var loc *time.Location = time.UTC
 		if hasTz {
 			loc, _ = time.LoadLocation(valueTz)

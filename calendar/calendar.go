@@ -28,6 +28,7 @@ type Event struct {
 	UID         string
 	Start       time.Time
 	End         time.Time
+	Transparent bool
 
 	Created      time.Time
 	LastModified time.Time
@@ -58,7 +59,7 @@ loop:
 		switch state {
 		case STATE_INIT:
 			// BEGIN:VCALENDAR being the first line is mandatory per RFC.
-			if line.BeginsCalendar() {
+			if line.Begins(ics.CalendarComponent) {
 				state = STATE_PARSE_CALENDAR
 			} else {
 				errs = append(errs, errors.New("Expected BEGIN:VCALENDAR"))
@@ -66,18 +67,18 @@ loop:
 			}
 		case STATE_PARSE_CALENDAR:
 			// Chomp until we read an event or exit the calendar.
-			if line.BeginsEvent() {
+			if line.Begins(ics.EventComponent) {
 				event = Event{}
 				state = STATE_PARSE_EVENT
-			} else if line.Property == "VERSION" {
+			} else if line.Property == ics.VersionProperty {
 				version = line.Value
-			} else if line.EndsCalendar() {
+			} else if line.Ends(ics.CalendarComponent) {
 				state = STATE_END
 			}
 		case STATE_PARSE_EVENT:
-			if line.BeginsAlarm() {
+			if line.Begins(ics.AlarmComponent) {
 				state = STATE_PARSE_ALARM
-			} else if line.EndsEvent() {
+			} else if line.Ends(ics.EventComponent) {
 				event = event.InferMissingValues()
 				calendar.Events = append(calendar.Events, event)
 				state = STATE_PARSE_CALENDAR
@@ -89,7 +90,7 @@ loop:
 			}
 		case STATE_PARSE_ALARM:
 			// Chomp until we get back to the event.
-			if line.EndsAlarm() {
+			if line.Ends(ics.AlarmComponent) {
 				state = STATE_PARSE_EVENT
 			}
 		case STATE_END:
@@ -118,22 +119,30 @@ loop:
 // UpdateFromIcsProperty sets an event property from an ICS line.
 func (e *Event) UpdateFromIcsLine(line ics.Line) (err error) {
 	switch line.Property {
-	case "DTSTART":
+	case ics.DateTimeStartProperty:
 		e.Start, err = line.ParseAsTime()
-	case "DTEND":
+	case ics.DateTimeEndProperty:
 		e.End, err = line.ParseAsTime()
-	case "SUMMARY":
+	case ics.SummaryProperty:
 		e.Summary = line.Value
-	case "DESCRIPTION":
+	case ics.DescriptionProperty:
 		e.Description = line.Value
-	case "LOCATION":
+	case ics.LocationProperty:
 		e.Location = line.Value
-	case "CREATED":
+	case ics.CreatedProperty:
 		e.Created, err = line.ParseAsTime()
-	case "LAST-MODIFIED":
+	case ics.LastModifiedProperty:
 		e.LastModified, err = line.ParseAsTime()
-	case "UID":
+	case ics.UIDProperty:
 		e.UID = line.Value
+	case ics.TransparentProperty:
+		if line.Value == ics.TransparentTransparency {
+			e.Transparent = true
+		} else if line.Value == ics.OpaqueTransparency {
+			e.Transparent = false
+		} else {
+			err = errors.New("Invalid transparency: " + line.Value)
+		}
 	}
 
 	return err
