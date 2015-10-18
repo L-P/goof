@@ -4,7 +4,9 @@ package calendar
 
 import (
 	"bufio"
+	"crypto/sha1"
 	"errors"
+	"fmt"
 	"io"
 	"sort"
 	"time"
@@ -25,7 +27,7 @@ type Event struct {
 	Location    string
 	UID         string
 	Start       time.Time
-	Duration    time.Duration
+	End         time.Time
 
 	Created      time.Time
 	LastModified time.Time
@@ -76,6 +78,7 @@ loop:
 			if line.BeginsAlarm() {
 				state = STATE_PARSE_ALARM
 			} else if line.EndsEvent() {
+				event = event.InferMissingValues()
 				calendar.Events = append(calendar.Events, event)
 				state = STATE_PARSE_CALENDAR
 			} else {
@@ -117,6 +120,8 @@ func (e *Event) UpdateFromIcsLine(line ics.Line) (err error) {
 	switch line.Property {
 	case "DTSTART":
 		e.Start, err = line.ParseAsTime()
+	case "DTEND":
+		e.End, err = line.ParseAsTime()
 	case "SUMMARY":
 		e.Summary = line.Value
 	case "DESCRIPTION":
@@ -132,6 +137,26 @@ func (e *Event) UpdateFromIcsLine(line ics.Line) (err error) {
 	}
 
 	return err
+}
+
+func (orig Event) InferMissingValues() Event {
+	e := orig
+
+	// Create 0-duration events when end/start is missing.
+	if !orig.Start.IsZero() && orig.End.IsZero() {
+		e.End = orig.Start
+	} else if orig.Start.IsZero() && !orig.End.IsZero() {
+		e.Start = orig.End
+	}
+
+	if len(e.UID) == 0 {
+		hash := sha1.New()
+		io.WriteString(hash, e.Start.String())
+		io.WriteString(hash, e.Summary)
+		e.UID = fmt.Sprintf("%x@goof", hash.Sum(nil))
+	}
+
+	return e
 }
 
 type byStart []Event
