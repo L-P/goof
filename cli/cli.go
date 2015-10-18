@@ -17,9 +17,10 @@ func main() {
 		panic(err)
 	}
 
-	cal, err := calendar.FromReader(ics)
-	if err != nil {
-		panic(err)
+	cal, errs := calendar.FromReader(ics)
+	if len(errs) > 0 {
+		fmt.Println("Errors occured when parsing the iCalendar:")
+		fmt.Println(errs)
 	}
 
 	fmt.Println(cal)

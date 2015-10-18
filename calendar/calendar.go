@@ -20,9 +20,13 @@ type Calendar struct {
 type Event struct {
 	Summary     string
 	Description string
+	Location    string
 	UID         string
 	Start       time.Time
 	Duration    time.Duration
+
+	Created      time.Time
+	LastModified time.Time
 }
 
 // States for the parser in FromReader which is implemented as a FSM.
@@ -35,7 +39,7 @@ const (
 )
 
 // FromReader reads ICS data and create a Calendar filled with Events.
-func FromReader(reader io.Reader) (calendar Calendar, err error) {
+func FromReader(reader io.Reader) (calendar Calendar, errs []error) {
 	scanner := bufio.NewScanner(reader)
 	var (
 		state int = STATE_INIT
@@ -52,7 +56,7 @@ loop:
 			if line.BeginsCalendar() {
 				state = STATE_PARSE_CALENDAR
 			} else {
-				err = errors.New("Expected BEGIN:VCALENDAR")
+				errs = append(errs, errors.New("Expected BEGIN:VCALENDAR"))
 				state = STATE_END
 			}
 		case STATE_PARSE_CALENDAR:
@@ -70,7 +74,10 @@ loop:
 				calendar.Events = append(calendar.Events, event)
 				state = STATE_PARSE_CALENDAR
 			} else {
-				event.UpdateFromIcsLine(line)
+				err := event.UpdateFromIcsLine(line)
+				if err != nil {
+					errs = append(errs, err)
+				}
 			}
 		case STATE_PARSE_ALARM:
 			// Chomp until we get back to the event.
@@ -85,56 +92,43 @@ loop:
 	}
 
 	if state != STATE_END {
-		err = errors.New("Parsing failed to end correctly.")
-	} else if scanner.Err() != nil {
-		err = scanner.Err()
+		errs = append(errs, errors.New("Parsing failed to end correctly."))
+	}
+	if scanner.Err() != nil {
+		errs = append(errs, scanner.Err())
 	}
 
 	sort.Sort(byStart(calendar.Events))
 
-	return
+	return calendar, errs
 }
 
 // UpdateFromIcsProperty sets an event property from an ICS line.
-func (e *Event) UpdateFromIcsLine(line ics.Line) {
+func (e *Event) UpdateFromIcsLine(line ics.Line) (err error) {
 	switch line.Property {
 	case "DTSTART":
-		e.Start = parseTime(line)
+		var parsed time.Time
+		parsed, err = line.ParseAsTime()
+		e.Start = parsed
 	case "SUMMARY":
 		e.Summary = line.Value
 	case "DESCRIPTION":
 		e.Description = line.Value
+	case "LOCATION":
+		e.Location = line.Value
+	case "CREATED":
+		var parsed time.Time
+		parsed, err = line.ParseAsTime()
+		e.Created = parsed
+	case "LAST-MODIFIED":
+		var parsed time.Time
+		parsed, err = line.ParseAsTime()
+		e.LastModified = parsed
 	case "UID":
 		e.UID = line.Value
 	}
-}
 
-func parseTime(line ics.Line) time.Time {
-	valueType, _ := line.Parameters["VALUE"]
-
-	var (
-		parsed time.Time
-		err    error
-	)
-
-	if valueType == "DATE" {
-		parsed, err = time.Parse("20060102", line.Value)
-	} else if line.Value[len(line.Value)-1] == 'Z' {
-		parsed, err = time.Parse("20060102T150405Z", line.Value)
-	} else {
-		valueTz, hasTz := line.Parameters["TZID"]
-		var loc *time.Location = time.UTC
-		if hasTz {
-			loc, _ = time.LoadLocation(valueTz)
-		}
-		parsed, err = time.ParseInLocation("20060102T150405", line.Value, loc)
-	}
-
-	if err != nil {
-		panic(err)
-	}
-
-	return parsed.In(time.UTC)
+	return err
 }
 
 type byStart []Event

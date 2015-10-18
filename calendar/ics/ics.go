@@ -2,9 +2,11 @@ package ics
 
 import (
 	"strings"
+	"time"
 )
 
 // Line contains the parsed data of a single line from an iCalendar file.
+// Every property and parameter names will be uppercased.
 type Line struct {
 	Property   string
 	Parameters map[string]string
@@ -51,17 +53,13 @@ func NewLine(str string) (line Line) {
 	line.original = str
 
 	splits := strings.SplitN(str, ":", 2)
-	switch len(splits) {
-	case 1:
-		line.Property, line.Parameters = parseProperty(splits[0])
-	case 2:
-		line.Property, line.Parameters = parseProperty(splits[0])
+	line.Property, line.Parameters = parseProperty(splits[0])
+
+	if len(splits) > 1 {
 		line.Value = splits[1]
-	default:
-		panic("unreachable")
 	}
 
-	return
+	return line
 }
 
 // parseProperty parse the property name, its parameters and their
@@ -69,19 +67,12 @@ func NewLine(str string) (line Line) {
 func parseProperty(str string) (property string, parameters map[string]string) {
 	splits := strings.SplitN(str, ";", 2)
 
-	switch len(splits) {
-	case 1:
-		property = splits[0]
-	case 2:
-		property = splits[0]
+	property = strings.ToUpper(splits[0])
+	if len(splits) > 1 {
 		parameters = parsePropertyParameters(splits[1])
-	default:
-		panic("unreachable")
 	}
 
-	property = strings.ToUpper(property)
-
-	return
+	return property, parameters
 }
 
 // parsePropertyParameters return a property parameters and their values
@@ -98,6 +89,29 @@ func parsePropertyParameters(str string) (parameters map[string]string) {
 			value = splits[1]
 		}
 		parameters[strings.ToUpper(splits[0])] = value
+	}
+
+	return
+}
+
+// ParseAsTime parses the value of a line as a date or timestamp.
+// Time will be given in its original timezone if given in the TZID
+// parameter or UTC by default.
+// See RFC 5545 3.3.4. and 3.3.5.
+func (line Line) ParseAsTime() (parsed time.Time, err error) {
+	valueType, _ := line.Parameters["VALUE"]
+
+	if valueType == "DATE" {
+		parsed, err = time.Parse("20060102", line.Value)
+	} else if line.Value[len(line.Value)-1] == 'Z' {
+		parsed, err = time.Parse("20060102T150405Z", line.Value)
+	} else {
+		valueTz, hasTz := line.Parameters["TZID"]
+		var loc *time.Location = time.UTC
+		if hasTz {
+			loc, _ = time.LoadLocation(valueTz)
+		}
+		parsed, err = time.ParseInLocation("20060102T150405", line.Value, loc)
 	}
 
 	return
