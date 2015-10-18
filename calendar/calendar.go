@@ -90,7 +90,7 @@ loop:
 		err = scanner.Err()
 	}
 
-	sort.Sort(ByStart(calendar.Events))
+	sort.Sort(byStart(calendar.Events))
 
 	return
 }
@@ -137,16 +137,16 @@ func parseTime(line ics.Line) time.Time {
 	return parsed.In(time.UTC)
 }
 
-type ByStart []Event
+type byStart []Event
 
-func (t ByStart) Len() int {
+func (t byStart) Len() int {
 	return len(t)
 }
 
-func (t ByStart) Swap(i, j int) {
+func (t byStart) Swap(i, j int) {
 	t[i], t[j] = t[j], t[i]
 }
 
-func (t ByStart) Less(i, j int) bool {
+func (t byStart) Less(i, j int) bool {
 	return t[i].Start.Unix() < t[j].Start.Unix()
 }
