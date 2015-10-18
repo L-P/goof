@@ -31,6 +31,7 @@ const (
 	STATE_END
 	STATE_PARSE_CALENDAR
 	STATE_PARSE_EVENT
+	STATE_PARSE_ALARM
 )
 
 // FromReader reads ICS data and create a Calendar filled with Events.
@@ -38,22 +39,17 @@ func FromReader(reader io.Reader) (calendar Calendar, err error) {
 	scanner := bufio.NewScanner(reader)
 	var (
 		state int = STATE_INIT
-		line  ics.Line
 		event Event
 	)
 
 loop:
 	for scanner.Scan() {
-		line, err = ics.NewLine(scanner.Text())
-
-		if err != nil {
-			return
-		}
+		line := ics.NewLine(scanner.Text())
 
 		switch state {
 		case STATE_INIT:
-			// Make BEGIN:VCALENDAR the mandatory first line of an .ics.
-			if line.String() == "BEGIN:VCALENDAR" {
+			// BEGIN:VCALENDAR being the first line is mandatory per RFC.
+			if line.BeginsCalendar() {
 				state = STATE_PARSE_CALENDAR
 			} else {
 				err = errors.New("Expected BEGIN:VCALENDAR")
@@ -61,18 +57,25 @@ loop:
 			}
 		case STATE_PARSE_CALENDAR:
 			// Chomp until we read an event or exit the calendar.
-			if line.String() == "BEGIN:VEVENT" {
+			if line.BeginsEvent() {
 				event = Event{}
 				state = STATE_PARSE_EVENT
-			} else if line.String() == "END:VCALENDAR" {
+			} else if line.EndsCalendar() {
 				state = STATE_END
 			}
 		case STATE_PARSE_EVENT:
-			if line.String() == "END:VEVENT" {
+			if line.BeginsAlarm() {
+				state = STATE_PARSE_ALARM
+			} else if line.EndsEvent() {
 				calendar.Events = append(calendar.Events, event)
 				state = STATE_PARSE_CALENDAR
 			} else {
 				event.UpdateFromIcsLine(line)
+			}
+		case STATE_PARSE_ALARM:
+			// Chomp until we get back to the event.
+			if line.EndsAlarm() {
+				state = STATE_PARSE_EVENT
 			}
 		case STATE_END:
 			break loop
