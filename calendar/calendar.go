@@ -12,12 +12,13 @@ import (
 	"home.leo-peltier.fr/goof/calendar/ics"
 )
 
-// An Event is an ICS VCALENDAR.
+// A Calendar is an ICS VCALENDAR.
 type Calendar struct {
 	Events []Event
 }
 
 // An Event is an ICS VEVENT.
+// See RFC 5545 3.6.1.
 type Event struct {
 	Summary     string
 	Description string
@@ -43,8 +44,9 @@ const (
 func FromReader(reader io.Reader) (calendar Calendar, errs []error) {
 	scanner := bufio.NewScanner(reader)
 	var (
-		state int = STATE_INIT
-		event Event
+		state   int = STATE_INIT
+		event   Event
+		version string
 	)
 
 loop:
@@ -65,6 +67,8 @@ loop:
 			if line.BeginsEvent() {
 				event = Event{}
 				state = STATE_PARSE_EVENT
+			} else if line.Property == "VERSION" {
+				version = line.Value
 			} else if line.EndsCalendar() {
 				state = STATE_END
 			}
@@ -92,6 +96,10 @@ loop:
 		}
 	}
 
+	if version != "2.0" {
+		errs = append(errs, errors.New("Version is not '2.0'"))
+	}
+
 	if state != STATE_END {
 		errs = append(errs, errors.New("Parsing failed to end correctly."))
 	}
@@ -108,9 +116,7 @@ loop:
 func (e *Event) UpdateFromIcsLine(line ics.Line) (err error) {
 	switch line.Property {
 	case "DTSTART":
-		var parsed time.Time
-		parsed, err = line.ParseAsTime()
-		e.Start = parsed
+		e.Start, err = line.ParseAsTime()
 	case "SUMMARY":
 		e.Summary = line.Value
 	case "DESCRIPTION":
@@ -118,13 +124,9 @@ func (e *Event) UpdateFromIcsLine(line ics.Line) (err error) {
 	case "LOCATION":
 		e.Location = line.Value
 	case "CREATED":
-		var parsed time.Time
-		parsed, err = line.ParseAsTime()
-		e.Created = parsed
+		e.Created, err = line.ParseAsTime()
 	case "LAST-MODIFIED":
-		var parsed time.Time
-		parsed, err = line.ParseAsTime()
-		e.LastModified = parsed
+		e.LastModified, err = line.ParseAsTime()
 	case "UID":
 		e.UID = line.Value
 	}

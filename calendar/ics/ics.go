@@ -115,5 +115,5 @@ func (line Line) ParseAsTime() (parsed time.Time, err error) {
 		parsed, err = time.ParseInLocation("20060102T150405", line.Value, loc)
 	}
 
-	return
+	return parsed, err
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -23,5 +24,6 @@ func main() {
 		fmt.Println(errs)
 	}
 
-	fmt.Println(cal)
+	out, _ := json.Marshal(cal.Events)
+	fmt.Printf("%s\n", out)
 }
