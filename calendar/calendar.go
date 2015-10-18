@@ -101,9 +101,8 @@ loop:
 	}
 
 	if version != "2.0" {
-		errs = append(errs, errors.New("Version is not '2.0'"))
+		errs = append(errs, errors.New("Version is not '2.0', may not be an iCalendar."))
 	}
-
 	if state != STATE_END {
 		errs = append(errs, errors.New("Parsing failed to end correctly."))
 	}
