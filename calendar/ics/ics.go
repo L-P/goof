@@ -1,3 +1,4 @@
+// Package ics contains the utilities for parsing iCalendar files.
 package ics
 
 import (

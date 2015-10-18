@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"../calendar"
+	"home.leo-peltier.fr/goof/calendar"
 )
 
 func main() {

@@ -2,7 +2,7 @@ PREREQUISITES = go npm
 _ := $(foreach exec,$(PREREQUISITES),\
 	$(if $(shell which $(exec)),_,$(error "$(exec) not found in $$PATH.")))
 
-PACKAGES=calendar
+PACKAGES=calendar gui
 
 SASS=node_modules/node-sass/bin/node-sass
 BOWER=node_modules/bower/bin/bower
@@ -25,13 +25,10 @@ BOWER_COMPONENTS=$(JQUERY_FILE) $(BOOTSTRAP_FILES)
 SASS_SRC=$(shell find sass -type f -name "*.sass")
 SASS_COMPILED=$(addsuffix .css,$(addprefix static/,$(basename $(SASS_SRC))))
 
-all: $(NODE_MODULES) $(BOWER_COMPONENTS) $(SASS_COMPILED) gui/gui cli/cli
+all: $(NODE_MODULES) $(BOWER_COMPONENTS) $(SASS_COMPILED) goof
 
-gui/gui: $(shell find gui $(PACKAGES) -type f -name "*.go")
-	cd gui && go build
-
-cli/cli: $(shell find cli $(PACKAGES) -type f -name "*.go")
-	cd cli && go build
+goof: goof.go $(shell find $(PACKAGES) -type f -name "*.go")
+	go build
 
 .PHONY: clean watch version
 clean:

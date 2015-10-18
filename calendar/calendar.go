@@ -1,4 +1,5 @@
-// calendar contains the high level strucs functions to handle iCalendar files.
+// Package calendar contains the high level types and functions to handle
+// iCalendar files.
 package calendar
 
 import (
@@ -8,7 +9,7 @@ import (
 	"sort"
 	"time"
 
-	"./ics"
+	"home.leo-peltier.fr/goof/calendar/ics"
 )
 
 // An Event is an ICS VCALENDAR.
