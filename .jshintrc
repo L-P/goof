@@ -1,0 +1,8 @@
+{
+    "strict": true,
+    "browser": true,
+    "jquery": true,
+    "globals": {
+        "_": false
+    }
+}

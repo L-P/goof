@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"sort"
 	"time"
 
@@ -113,6 +114,19 @@ loop:
 	sort.Sort(byStart(calendar.Events))
 
 	return calendar, errs
+}
+
+// FromFile read an iCalendar from a path.
+func FromFile(path string) (calendar Calendar, errs []error) {
+	file, err := os.Open(path)
+	defer file.Close()
+
+	if err != nil {
+		errs = append(errs, err)
+		return
+	}
+
+	return FromReader(file)
 }
 
 // UpdateFromIcsProperty sets an event property from an ICS line.
