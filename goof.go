@@ -1,47 +1,29 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"html/template"
-	"net/http"
-	"time"
+	"os"
 
-	"github.com/zenazn/goji"
-	"github.com/zenazn/goji/web"
-
-	"./calendar"
+	"home.leo-peltier.fr/goof/calendar"
 )
 
-func handler(c web.C, w http.ResponseWriter, r *http.Request) {
-	t := template.Must(template.ParseGlob("templates/*.html"))
-	days := []calendar.Day{
-		{
-			Date: time.Now(),
-			Events: []calendar.Event{
-				{
-					Time:        time.Now(),
-					Title:       "test event",
-					Description: "longer desc",
-				},
-			},
-		},
+func main() {
+	if len(os.Args) != 2 {
+		panic("Need one .ics as sole argument.")
 	}
 
-	t.ExecuteTemplate(w, "index", struct {
-		days []calendar.Day
-	}{
-		days: days,
-	})
+	ics, err := os.Open(os.Args[1])
+	if err != nil {
+		panic(err)
+	}
 
-	fmt.Println(days)
-}
+	cal, errs := calendar.FromReader(ics)
+	if len(errs) > 0 {
+		fmt.Println("Errors occured when parsing the iCalendar:")
+		fmt.Println(errs)
+	}
 
-func main() {
-	goji.Get("/", handler)
-	goji.DefaultMux.Handle(
-		"/static/*",
-		http.StripPrefix("/static/", http.FileServer(http.Dir("static"))),
-	)
-
-	goji.Serve()
+	out, _ := json.Marshal(cal.Events)
+	fmt.Printf("%s\n", out)
 }
