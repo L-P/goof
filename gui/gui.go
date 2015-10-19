@@ -3,7 +3,6 @@ package gui
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"html/template"
 	"net/http"
 	"strings"
@@ -18,7 +17,7 @@ import (
 type JSONResponse struct {
 	Data interface{}
 	Meta struct {
-		Errors []error
+		Errors []string
 	}
 }
 
@@ -30,14 +29,15 @@ func handler(c web.C, w http.ResponseWriter, r *http.Request) {
 func sendJSONResponse(c web.C, w http.ResponseWriter, data interface{}) {
 	var response JSONResponse
 	response.Data = data
-	response.Meta.Errors = c.Env["errors"].([]error)
+	for _, err := range c.Env["errors"].([]error) {
+		response.Meta.Errors = append(response.Meta.Errors, err.Error())
+	}
 
 	b, err := json.Marshal(response)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println(response.Meta.Errors)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(b)
 }
