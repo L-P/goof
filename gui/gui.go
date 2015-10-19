@@ -20,7 +20,6 @@ type JSONResponse struct {
 
 func handler(c web.C, w http.ResponseWriter, r *http.Request) {
 	t := template.Must(template.ParseGlob("templates/*.html"))
-
 	t.ExecuteTemplate(w, "index", nil)
 }
 

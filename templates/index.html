@@ -14,13 +14,17 @@
 </head>
 
 <body>
-{{ template "navbar" }}
-{{ template "calendar" }}
+
+<script class="js-template" data-name="navbar" type="text/html">{{ template "navbar" }}</script>
+<script class="js-template" data-name="calendar" type="text/html">{{ template "calendar" }}</script>
+<script class="js-template" data-name="calendar-multiweek" type="text/html">{{ template "calendar-multiweek" }}</script>
 
 <script src="/static/js/jquery.min.js"></script>
-<script src="/static/js/bootstrap.min.js"></script>
 <script src="/static/js/underscore.min.js"></script>
 <script src="/static/js/backbone.min.js"></script>
+<script src="/static/js/mustache.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/js/goof.js"></script>
 </body>
 
 </html>

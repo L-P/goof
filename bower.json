@@ -7,7 +7,8 @@
     "dependencies": {
         "backbone": "~1.2.3",
         "bootstrap": "~3.3.5",
-        "jquery": "~2.1.4"
+        "jquery": "~2.1.4",
+        "mustache.js": "~2.2.0"
     },
     "private": true,
     "license": "UNLICENSED"

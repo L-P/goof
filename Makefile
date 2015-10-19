@@ -10,6 +10,7 @@ BOWER=node_modules/bower/bin/bower
 NODE_MODULES=$(SASS) $(BOWER)
 
 JQUERY_FILE=bower_components/jquery/dist/jquery.min.js
+MUSTACHE_FILE=bower_components/mustache.js/mustache.min.js
 BACKBONE_FILES=bower_components/backbone/backbone-min.js bower_components/underscore/underscore-min.js
 
 BOOTSTRAP_FILES=\
@@ -21,7 +22,7 @@ bower_components/bootstrap/dist/fonts/glyphicons-halflings-regular.ttf\
 bower_components/bootstrap/dist/fonts/glyphicons-halflings-regular.woff\
 bower_components/bootstrap/dist/fonts/glyphicons-halflings-regular.woff2\
 
-BOWER_COMPONENTS=$(JQUERY_FILE) $(BOOTSTRAP_FILES) $(BACKBONE_FILES)
+BOWER_COMPONENTS=$(JQUERY_FILE) $(BOOTSTRAP_FILES) $(BACKBONE_FILES) $(MUSTACHE_FILE)
 
 SASS_SRC=$(shell find sass -type f -name "*.sass")
 SASS_COMPILED=$(addsuffix .css,$(addprefix static/,$(basename $(SASS_SRC))))
