@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -68,28 +67,28 @@ func calendarHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 }
 
 func parseRange(str string) (lower, upper time.Time, err error) {
-	splits := strings.SplitN(str, "-", 2)
+	splits := strings.SplitN(str, ",", 2)
 	if len(splits) != 2 {
-		err = errors.New("Bad value for 'range' parameter, need '\\d+-\\d+'.")
+		err = errors.New("Bad value for 'range' parameter.")
 		return
 	}
 
-	lowerInt, err := strconv.ParseInt(splits[0], 10, 64)
+	lower, err = time.Parse("2006-01-02", splits[0])
 	if err != nil {
 		return
 	}
 
-	upperInt, err := strconv.ParseInt(splits[1], 10, 64)
+	upper, err = time.Parse("2006-01-02", splits[1])
 	if err != nil {
 		return
 	}
 
-	if upperInt < lowerInt {
+	if upper.Before(lower) {
 		err = errors.New("upper < lower")
 		return
 	}
 
-	return time.Unix(lowerInt, 0), time.Unix(upperInt, 0), err
+	return
 }
 
 func loadCalendars(c *web.C, h http.Handler) http.Handler {
