@@ -4,8 +4,10 @@
     "jquery": true,
     "globalstrict": true,
     "globals": {
-        "_": false,
         "Backbone": false,
-        "Mustache": false
+        "Mustache": false,
+        "_": false,
+        "console": false,
+        "goof": true
     }
 }

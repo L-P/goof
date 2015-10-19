@@ -200,6 +200,7 @@ type CalendarFilter struct {
 	RangeLower time.Time
 }
 
+// Filter returns a copy of a calender with its event pruned.
 func (original Calendar) Filter(filter CalendarFilter) (filtered Calendar) {
 	for _, event := range original.Events {
 		startsInRange := event.Start.After(filter.RangeLower) && event.Start.Before(filter.RangeUpper)
@@ -208,5 +209,6 @@ func (original Calendar) Filter(filter CalendarFilter) (filtered Calendar) {
 			filtered.Events = append(filtered.Events, event)
 		}
 	}
+
 	return
 }
