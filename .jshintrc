@@ -2,7 +2,10 @@
     "strict": true,
     "browser": true,
     "jquery": true,
+    "globalstrict": true,
     "globals": {
-        "_": false
+        "_": false,
+        "Backbone": false,
+        "Mustache": false
     }
 }

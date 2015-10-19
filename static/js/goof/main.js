@@ -1,5 +1,8 @@
+"use strict";
+
 (function() {
-    "use strict";
+    document.goof = document.goof || {};
+
     var loadTemplates = function() {
         var templates = {};
         $('.js-template').each(function(_, tpl) {

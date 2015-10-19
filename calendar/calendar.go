@@ -194,3 +194,19 @@ func (t byStart) Swap(i, j int) {
 func (t byStart) Less(i, j int) bool {
 	return t[i].Start.Unix() < t[j].Start.Unix()
 }
+
+type CalendarFilter struct {
+	RangeUpper time.Time
+	RangeLower time.Time
+}
+
+func (original Calendar) Filter(filter CalendarFilter) (filtered Calendar) {
+	for _, event := range original.Events {
+		startsInRange := event.Start.After(filter.RangeLower) && event.Start.Before(filter.RangeUpper)
+		endsInRange := event.End.After(filter.RangeLower) && event.End.Before(filter.RangeUpper)
+		if startsInRange || endsInRange {
+			filtered.Events = append(filtered.Events, event)
+		}
+	}
+	return
+}
