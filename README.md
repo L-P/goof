@@ -14,19 +14,10 @@ npm   version  1.4.21
 ```
 
 ### Building
-Run `make`.
+```
+go get github.com/zenazn/goji
+make
+```
 
 ### Running
 Run `./goof` and head to http://localhost:8000/
-
-## Files
-```
-.
-├── sass            # unparsed SASS files
-├── static          # only directory accessible through HTTP
-│   ├── css
-│   ├── fonts
-│   ├── js
-│   └── sass        # compiled SASS
-└── templates       # go html/template files
-```
