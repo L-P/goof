@@ -2,11 +2,8 @@ package gui
 
 import (
 	"encoding/json"
-	"errors"
 	"html/template"
 	"net/http"
-	"strings"
-	"time"
 
 	"github.com/zenazn/goji"
 	"github.com/zenazn/goji/web"
@@ -14,16 +11,28 @@ import (
 	"home.leo-peltier.fr/goof/calendar"
 )
 
+type ApiEndpoint func(c web.C, r *http.Request) (data interface{}, err error)
+
+// apiHandler wraps an ApiEndpoint to add error and content-type handling.
+func apiHandler(apiFunc ApiEndpoint) web.HandlerType {
+	wrap := func(c web.C, w http.ResponseWriter, r *http.Request) {
+		data, err := apiFunc(c, r)
+		errs := make([]error, 0)
+		if err != nil {
+			errs = append(errs, err)
+		}
+		c.Env["errors"] = errs
+		sendJSONResponse(c, w, data)
+	}
+
+	return web.HandlerFunc(wrap)
+}
+
 type JSONResponse struct {
 	Data interface{}
 	Meta struct {
 		Errors []string
 	}
-}
-
-func handler(c web.C, w http.ResponseWriter, r *http.Request) {
-	t := template.Must(template.ParseGlob("templates/*.html"))
-	t.ExecuteTemplate(w, "index", nil)
 }
 
 func sendJSONResponse(c web.C, w http.ResponseWriter, data interface{}) {
@@ -45,8 +54,8 @@ func sendJSONResponse(c web.C, w http.ResponseWriter, data interface{}) {
 func Serve() {
 	goji.Use(loadCalendars)
 
-	goji.Get("/", handler)
-	goji.Get("/calendar/:calendar", calendarHandler)
+	goji.Get("/", rootHandler)
+	goji.Get("/calendar/:calendar", apiHandler(getCalendar))
 
 	goji.DefaultMux.Handle(
 		"/static/*",
@@ -56,41 +65,13 @@ func Serve() {
 	goji.Serve()
 }
 
-func calendarHandler(c web.C, w http.ResponseWriter, r *http.Request) {
-	data, err := getCalendar(c, r)
-	errs := make([]error, 0)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	c.Env["errors"] = errs
-	sendJSONResponse(c, w, data)
+func rootHandler(c web.C, w http.ResponseWriter, r *http.Request) {
+	t := template.Must(template.ParseGlob("templates/*.html"))
+	t.ExecuteTemplate(w, "index", nil)
 }
 
-func parseRange(str string) (lower, upper time.Time, err error) {
-	splits := strings.SplitN(str, ",", 2)
-	if len(splits) != 2 {
-		err = errors.New("Bad value for 'range' parameter.")
-		return
-	}
-
-	lower, err = time.Parse("2006-01-02", splits[0])
-	if err != nil {
-		return
-	}
-
-	upper, err = time.Parse("2006-01-02", splits[1])
-	if err != nil {
-		return
-	}
-
-	if upper.Before(lower) {
-		err = errors.New("upper < lower")
-		return
-	}
-
-	return
-}
-
+// loadCalendars is a Goji middleware that injects calendars in the request
+// context.
 func loadCalendars(c *web.C, h http.Handler) http.Handler {
 	errs := make([]error, 0)
 	calendars := make(map[string]calendar.Calendar, 0)
@@ -112,39 +93,4 @@ func loadCalendars(c *web.C, h http.Handler) http.Handler {
 	}
 
 	return http.HandlerFunc(wrap)
-}
-
-func getCalendar(c web.C, r *http.Request) (data struct{ Calendar calendar.Calendar }, err error) {
-	calendars := c.Env["calendars"].(map[string]calendar.Calendar)
-	if _, prs := calendars[c.URLParams["calendar"]]; !prs {
-		err = errors.New("Calendar not found.")
-		return
-	}
-
-	fullCalendar := calendars[c.URLParams["calendar"]]
-
-	r.ParseForm()
-	if r.Form.Get("range") == "" {
-		err = errors.New("Range parameter is mandatory.")
-		return
-	}
-
-	lower, upper, err := parseRange(r.Form.Get("range"))
-	if err != nil {
-		return
-	}
-
-	if upper.Sub(lower).Seconds() > 2*3600*24*31 {
-		err = errors.New("Range > 2 month.")
-		return
-	}
-
-	data.Calendar = fullCalendar.Filter(
-		calendar.CalendarFilter{
-			RangeUpper: upper,
-			RangeLower: lower,
-		},
-	)
-
-	return
 }
