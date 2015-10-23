@@ -201,11 +201,23 @@ type CalendarFilter struct {
 }
 
 // Filter returns a copy of a calender with its event pruned.
-func (original Calendar) Filter(filter CalendarFilter) (filtered Calendar) {
+func (original Calendar) Filter(filter CalendarFilter) (filtered Calendar, err error) {
 	for _, event := range original.Events {
-		startsInRange := event.Start.After(filter.RangeLower) && event.Start.Before(filter.RangeUpper)
-		endsInRange := event.End.After(filter.RangeLower) && event.End.Before(filter.RangeUpper)
-		if startsInRange || endsInRange {
+		include := true
+
+		if !filter.RangeLower.IsZero() {
+			if event.End.Before(filter.RangeLower) {
+				include = false
+			}
+		}
+
+		if !filter.RangeUpper.IsZero() {
+			if event.Start.After(filter.RangeUpper) {
+				include = false
+			}
+		}
+
+		if include {
 			filtered.Events = append(filtered.Events, event)
 		}
 	}

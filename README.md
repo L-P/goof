@@ -21,3 +21,6 @@ make
 
 ### Running
 Run `./goof` and head to http://localhost:8000/
+
+## Hacking
+See the [API](API.md) definition to get an idea of how the JS client works.

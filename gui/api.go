@@ -18,33 +18,27 @@ func getCalendar(c web.C, r *http.Request) (data interface{}, err error) {
 		return
 	}
 
-	fullCalendar := calendars[c.URLParams["calendar"]]
+	var (
+		fullCalendar     calendar.Calendar = calendars[c.URLParams["calendar"]]
+		filteredCalendar calendar.Calendar
+		filter           calendar.CalendarFilter
+	)
 
 	r.ParseForm()
-	if r.Form.Get("range") == "" {
-		err = errors.New("Range parameter is mandatory.")
-		return
+	if r.Form.Get("range") != "" {
+		filter.RangeLower, filter.RangeUpper, err = parseRange(r.Form.Get("range"))
+		if err != nil {
+			return
+		}
 	}
 
-	lower, upper, err := parseRange(r.Form.Get("range"))
+	filteredCalendar, err = fullCalendar.Filter(filter)
 	if err != nil {
 		return
 	}
 
-	if upper.Sub(lower).Seconds() > 2*3600*24*31 {
-		err = errors.New("Range > 2 month.")
-		return
-	}
-
-	data = struct {
-		Calendar calendar.Calendar
-	}{
-		Calendar: fullCalendar.Filter(
-			calendar.CalendarFilter{
-				RangeUpper: upper,
-				RangeLower: lower,
-			},
-		),
+	data = struct{ Calendar calendar.Calendar }{
+		Calendar: filteredCalendar,
 	}
 
 	return data, err
@@ -58,19 +52,25 @@ func parseRange(str string) (lower, upper time.Time, err error) {
 		return
 	}
 
-	lower, err = time.Parse("2006-01-02", splits[0])
-	if err != nil {
-		return
+	if splits[0] != "" {
+		lower, err = time.Parse("2006-01-02", splits[0])
+		if err != nil {
+			return
+		}
 	}
 
-	upper, err = time.Parse("2006-01-02", splits[1])
-	if err != nil {
-		return
+	if splits[1] != "" {
+		upper, err = time.Parse("2006-01-02", splits[1])
+		if err != nil {
+			return
+		}
 	}
 
-	if upper.Before(lower) {
-		err = errors.New("upper < lower")
-		return
+	if !upper.IsZero() && !lower.IsZero() {
+		if upper.Before(lower) {
+			err = errors.New("upper < lower")
+			return
+		}
 	}
 
 	return
