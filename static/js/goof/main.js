@@ -34,6 +34,8 @@ document.goof = document.goof || {};
         upper.setTime(now + delta);
 
         var range = formatDate(lower) + "," + formatDate(upper);
+
+        // TODO: Stub.
         var calendars = {
             "calendar.ics": {}
         };
@@ -61,6 +63,5 @@ document.goof = document.goof || {};
             calendars: calendars,
             template: templates["next-events"]
         });
-        nextEventsView.render();
     });
 })();

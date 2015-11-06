@@ -1,5 +1,7 @@
 <% define "next-events" %>
 <ul>
-    <li>Render</li>
+    {{ #events }}
+    <li>{{ Summary }}</li>
+    {{ /events }}
 </ul>
 <% end %>

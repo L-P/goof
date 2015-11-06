@@ -11,16 +11,17 @@ document.goof.NextEventsView = Backbone.View.extend({
         this.calendars = options.calendars;
         this.template = options.template;
 
-        for(var name in this.calendars) {
-            this.listenTo(this.calendars[name], "change", this.render);
-        }
+        _.each(this.calendars, function(v) {
+            this.listenTo(v, "sync", this.render);
+        }, this);
     },
 
     render: function() {
         var events = [];
-        for(var name in this.calendars) {
-            events = events.concat(this.calendars[name].models);
-        }
+
+        _.each(this.calendars, function(v) {
+            events = events.concat(_.pluck(v.models, "attributes"));
+        });
 
         $(".js-next-events").html(Mustache.render(
             this.template,
