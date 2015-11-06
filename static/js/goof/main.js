@@ -13,24 +13,25 @@ document.goof = document.goof || {};
         return templates;
     };
 
+    var padLeft = function(str, fill, count) {
+        return String(String(fill).repeat(count) + str).slice(-count);
+    };
+
     var initCalendars = function() {
         var formatDate = function(date) {
-            var day = date.getUTCDate() + 1;
-            if (("" + day).length < 2)
-                day = "0" + day;
-
-            var month = date.getUTCMonth() + 1;
-            if (("" + month).length < 2)
-                month = "0" + month;
+            var day   = padLeft(date.getUTCDate() + 1, "0", 2);
+            var month = padLeft(date.getUTCMonth() + 1, "0", 2);
 
             return [date.getUTCFullYear(), month, day].join("-");
         };
 
+        var delta = 1000 * 3600 * 24 * 20; // 20 days
         var now = new Date().getTime();
         var lower = new Date();
         var upper = new Date();
-        lower.setTime(now - (1000 * 3600 * 24 * 20));
-        upper.setTime(now + (1000 * 3600 * 24 * 20));
+
+        lower.setTime(now - delta);
+        upper.setTime(now + delta);
 
         var range = formatDate(lower) + "," + formatDate(upper);
         var calendars = {
