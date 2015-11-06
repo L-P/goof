@@ -40,8 +40,12 @@ document.goof = document.goof || {};
             "calendar.ics": {}
         };
 
+        var id = 1;
         for (var name in calendars) {
-            var calendar = new document.goof.Calendar(null, {name: name});
+            var calendar = new document.goof.Calendar(null, {
+                name: name,
+                paletteId: id++
+            });
             calendar.fetch({data: {range: range}});
             calendars[name] = calendar;
         }

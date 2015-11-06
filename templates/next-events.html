@@ -1,7 +1,11 @@
 <% define "next-events" %>
-<ul>
+<ul class="list-unstyled">
     {{ #events }}
-    <li>{{ Summary }}</li>
+    <li>
+        <span class="calendar-name calendar-name-{{ collection.paletteId }}">
+            {{ attributes.Summary }}
+        </span>
+    </li>
     {{ /events }}
 </ul>
 <% end %>

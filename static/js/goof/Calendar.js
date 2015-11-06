@@ -5,6 +5,8 @@ document.goof = document.goof || {};
 document.goof.Calendar = Backbone.Collection.extend({
     model: document.goof.Event,
     name: null,
+    paletteId: null,
+
     url: function() {
         return "/calendar/" + this.name;
     },
@@ -19,5 +21,6 @@ document.goof.Calendar = Backbone.Collection.extend({
 
     initialize: function(models, options) {
         this.name = options.name;
+        this.paletteId = options.paletteId;
     },
 });

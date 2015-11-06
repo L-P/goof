@@ -16,16 +16,31 @@ document.goof.NextEventsView = Backbone.View.extend({
         }, this);
     },
 
+    /**
+     * Return all events from all calendars set in the future.
+     *
+     * @return Event[]
+     */
+    getNextEvents: function() {
+        var now = new Date().getTime();
+
+        return _.chain(this.calendars)
+            .pluck("models")
+            .reduce(function(memo, v) {
+                return memo.concat(v);
+            })
+            .filter(function(v) {
+                var start = Date.parse(v.attributes.Start);
+                return start > now;
+            })
+            .value()
+        ;
+    },
+
     render: function() {
-        var events = [];
-
-        _.each(this.calendars, function(v) {
-            events = events.concat(_.pluck(v.models, "attributes"));
-        });
-
         $(".js-next-events").html(Mustache.render(
             this.template,
-            {events: events}
+            {events: this.getNextEvents()}
         ));
 
         return this;
