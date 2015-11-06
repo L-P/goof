@@ -1,4 +1,4 @@
-{{define "index"}}
+<% define "index" %>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -15,10 +15,10 @@
 
 <body>
 
-<script class="js-template" data-name="calendar" type="text/html">{{ template "calendar" }}</script>
-<script class="js-template" data-name="calendar-multiweek" type="text/html">{{ template "calendar-multiweek" }}</script>
-<script class="js-template" data-name="navbar" type="text/html">{{ template "navbar" }}</script>
-<script class="js-template" data-name="next-events" type="text/html">{{ template "next-events" }}</script>
+<script class="js-template" data-name="calendar" type="text/html"><% template "calendar" %></script>
+<script class="js-template" data-name="calendar-multiweek" type="text/html"><% template "calendar-multiweek" %></script>
+<script class="js-template" data-name="navbar" type="text/html"><% template "navbar" %></script>
+<script class="js-template" data-name="next-events" type="text/html"><% template "next-events" %></script>
 
 <script src="/static/js/jquery.min.js"></script>
 <script src="/static/js/underscore.min.js"></script>
@@ -34,4 +34,4 @@
 </body>
 
 </html>
-{{end}}
+<% end %>

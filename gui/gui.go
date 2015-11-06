@@ -66,7 +66,9 @@ func Serve() {
 }
 
 func rootHandler(c web.C, w http.ResponseWriter, r *http.Request) {
-	t := template.Must(template.ParseGlob("templates/*.html"))
+	t := template.New("")
+	// Solve mustache/go delimiter conflict by using <% %> in views.
+	t.Delims("<%", "%>").ParseGlob("templates/*.html")
 	t.ExecuteTemplate(w, "index", nil)
 }
 
