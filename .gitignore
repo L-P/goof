@@ -4,5 +4,7 @@
 /*.ics
 /bower_components
 /node_modules
+/static/js/**/*.min.js
+/static/js/**/*.map
 /static/sass/*
 !/static/sass/empty

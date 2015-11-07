@@ -67,5 +67,6 @@ document.goof = document.goof || {};
             calendars: calendars,
             template: templates["next-events"]
         });
+        nextEventsView.render();
     });
 })();
