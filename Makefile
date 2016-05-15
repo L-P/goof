@@ -4,13 +4,10 @@ _ := $(foreach exec,$(PREREQUISITES),\
 
 # This is needed to make JS source maps work. Firefox does not seem to
 # understand relative URLs so this will have to do for now.
-DEV_URL="http://localhost:3000"
+DEV_URL=http://localhost:8000
 
 # Order matters.
 GOOF_JS=\
-static/js/goof/Event.js\
-static/js/goof/Calendar.js\
-static/js/goof/NextEventsView.js\
 static/js/goof/main.js\
 
 # Go packages we define.
@@ -27,6 +24,7 @@ BOOTSTRAP_JS=bower_components/bootstrap/dist/js/bootstrap.js
 JQUERY_JS=bower_components/jquery/dist/jquery.js
 MUSTACHE_JS=bower_components/mustache.js/mustache.js
 UNDERSCORE_JS=bower_components/underscore/underscore.js
+MOMENT_JS=bower_components/moment/moment.js
 FULLCALENDAR_JS=bower_components/fullcalendar/dist/fullcalendar.js
 
 BOOTSTRAP_FILES=$(BOOTSTRAP_JS)\
@@ -37,7 +35,7 @@ bower_components/bootstrap/dist/fonts/glyphicons-halflings-regular.ttf\
 bower_components/bootstrap/dist/fonts/glyphicons-halflings-regular.woff\
 bower_components/bootstrap/dist/fonts/glyphicons-halflings-regular.woff2\
 
-BOWER_COMPONENTS=$(JQUERY_JS) $(BOOTSTRAP_FILES) $(UNDERSCORE_JS) $(BACKBONE_JS) $(MUSTACHE_JS) $(FULLCALENDAR_JS)
+BOWER_COMPONENTS=$(JQUERY_JS) $(BOOTSTRAP_FILES) $(UNDERSCORE_JS) $(BACKBONE_JS) $(MUSTACHE_JS) $(MOMENT_JS) $(FULLCALENDAR_JS)
 
 SASS_SRC=$(shell find sass -type f -name "*.sass")
 SASS_COMPILED=$(addsuffix .css,$(addprefix static/,$(basename $(SASS_SRC))))
@@ -51,12 +49,14 @@ goof: goof.go $(shell find $(PACKAGES) -type f -name "*.go")
 	go build
 
 # Order matters.
-$(VENDOR_JS_COMPILED): $(JQUERY_JS) $(UNDERSCORE_JS) $(BACKBONE_JS) $(BOOTSTRAP_JS) $(MUSTACHE_JS) $(FULLCALENDAR_JS)
-	$(UGLIFYJS) --screw-ie8 --mangle --compress --output "$@" -- $^
+$(VENDOR_JS_COMPILED): $(JQUERY_JS) $(UNDERSCORE_JS) $(BACKBONE_JS) $(BOOTSTRAP_JS) $(MUSTACHE_JS) $(MOMENT_JS) $(FULLCALENDAR_JS)
+	$(UGLIFYJS) --screw-ie8 --mangle --compress --output "$@"\
+		--source-map "$@.map" --source-map-url "$(DEV_URL)/$@.map"\
+		-- $^
 
 $(GOOF_JS_COMPILED): $(GOOF_JS)
 	$(UGLIFYJS) --screw-ie8 --mangle --compress --output "$@"\
-		--source-map "$@.map" --source-map-url "http://localhost:3000/$@.map"\
+		--source-map "$@.map" --source-map-url "$(DEV_URL)/$@.map"\
 		--prefix 2\
 		-- $^
 
