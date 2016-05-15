@@ -27,6 +27,7 @@ BOOTSTRAP_JS=bower_components/bootstrap/dist/js/bootstrap.js
 JQUERY_JS=bower_components/jquery/dist/jquery.js
 MUSTACHE_JS=bower_components/mustache.js/mustache.js
 UNDERSCORE_JS=bower_components/underscore/underscore.js
+FULLCALENDAR_JS=bower_components/fullcalendar/dist/fullcalendar.js
 
 BOOTSTRAP_FILES=$(BOOTSTRAP_JS)\
 bower_components/bootstrap/dist/css/bootstrap.min.css\
@@ -36,7 +37,7 @@ bower_components/bootstrap/dist/fonts/glyphicons-halflings-regular.ttf\
 bower_components/bootstrap/dist/fonts/glyphicons-halflings-regular.woff\
 bower_components/bootstrap/dist/fonts/glyphicons-halflings-regular.woff2\
 
-BOWER_COMPONENTS=$(JQUERY_JS) $(BOOTSTRAP_FILES) $(UNDERSCORE_JS) $(BACKBONE_JS) $(MUSTACHE_JS)
+BOWER_COMPONENTS=$(JQUERY_JS) $(BOOTSTRAP_FILES) $(UNDERSCORE_JS) $(BACKBONE_JS) $(MUSTACHE_JS) $(FULLCALENDAR_JS)
 
 SASS_SRC=$(shell find sass -type f -name "*.sass")
 SASS_COMPILED=$(addsuffix .css,$(addprefix static/,$(basename $(SASS_SRC))))
@@ -50,7 +51,7 @@ goof: goof.go $(shell find $(PACKAGES) -type f -name "*.go")
 	go build
 
 # Order matters.
-$(VENDOR_JS_COMPILED): $(JQUERY_JS) $(UNDERSCORE_JS) $(BACKBONE_JS) $(BOOTSTRAP_JS) $(MUSTACHE_JS)
+$(VENDOR_JS_COMPILED): $(JQUERY_JS) $(UNDERSCORE_JS) $(BACKBONE_JS) $(BOOTSTRAP_JS) $(MUSTACHE_JS) $(FULLCALENDAR_JS)
 	$(UGLIFYJS) --screw-ie8 --mangle --compress --output "$@" -- $^
 
 $(GOOF_JS_COMPILED): $(GOOF_JS)
