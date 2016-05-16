@@ -21,9 +21,10 @@ Empty arrays and objects may be `null` instead.
 `:id` is a calendar name.
 
 ### Query parameters
-  * `range`: optional string, two dates separated by a comma (eg.
-    "2006-01-02,2006-02-30"). One of the two dates can be omitted. An empty
-    range will return all events.
+  * `start`: optional string, date eg. "2006-01-02"
+  * `end`: optional string, date eg. "2006-02-30"
+
+One of the two dates can be omitted. An empty range will return all events.
 
 ### Response
 ```json

@@ -3,7 +3,6 @@ package gui
 import (
 	"errors"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/zenazn/goji/web"
@@ -25,9 +24,19 @@ func getCalendar(c web.C, r *http.Request) (data interface{}, err error) {
 	)
 
 	r.ParseForm()
-	if r.Form.Get("range") != "" {
-		filter.RangeLower, filter.RangeUpper, err = parseRange(r.Form.Get("range"))
-		if err != nil {
+	filter.RangeLower, err = time.Parse("2006-01-02", r.Form.Get("start"))
+	if err != nil {
+		return
+	}
+
+	filter.RangeUpper, err = time.Parse("2006-01-02", r.Form.Get("end"))
+	if err != nil {
+		return
+	}
+
+	if !filter.RangeUpper.IsZero() && !filter.RangeLower.IsZero() {
+		if filter.RangeUpper.Before(filter.RangeLower) {
+			err = errors.New("upper < lower")
 			return
 		}
 	}
@@ -42,36 +51,4 @@ func getCalendar(c web.C, r *http.Request) (data interface{}, err error) {
 	}
 
 	return data, err
-}
-
-// parseRange takes a string (eg. 2006-01-02,2006-02-02) and return the parsed times.
-func parseRange(str string) (lower, upper time.Time, err error) {
-	splits := strings.SplitN(str, ",", 2)
-	if len(splits) != 2 {
-		err = errors.New("Bad value for 'range' parameter.")
-		return
-	}
-
-	if splits[0] != "" {
-		lower, err = time.Parse("2006-01-02", splits[0])
-		if err != nil {
-			return
-		}
-	}
-
-	if splits[1] != "" {
-		upper, err = time.Parse("2006-01-02", splits[1])
-		if err != nil {
-			return
-		}
-	}
-
-	if !upper.IsZero() && !lower.IsZero() {
-		if upper.Before(lower) {
-			err = errors.New("upper < lower")
-			return
-		}
-	}
-
-	return
 }
