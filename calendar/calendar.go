@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"sort"
 	"time"
 
@@ -115,6 +116,19 @@ loop:
 	return calendar, errs
 }
 
+// FromFile read an iCalendar from a path.
+func FromFile(path string) (calendar Calendar, errs []error) {
+	file, err := os.Open(path)
+	defer file.Close()
+
+	if err != nil {
+		errs = append(errs, err)
+		return
+	}
+
+	return FromReader(file)
+}
+
 // UpdateFromIcsProperty sets an event property from an ICS line.
 func (e *Event) UpdateFromIcsLine(line ics.Line) (err error) {
 	switch line.Property {
@@ -179,4 +193,34 @@ func (t byStart) Swap(i, j int) {
 
 func (t byStart) Less(i, j int) bool {
 	return t[i].Start.Unix() < t[j].Start.Unix()
+}
+
+type CalendarFilter struct {
+	RangeUpper time.Time
+	RangeLower time.Time
+}
+
+// Filter returns a copy of a calender with its event pruned.
+func (original Calendar) Filter(filter CalendarFilter) (filtered Calendar, err error) {
+	for _, event := range original.Events {
+		include := true
+
+		if !filter.RangeLower.IsZero() {
+			if event.End.Before(filter.RangeLower) {
+				include = false
+			}
+		}
+
+		if !filter.RangeUpper.IsZero() {
+			if event.Start.After(filter.RangeUpper) {
+				include = false
+			}
+		}
+
+		if include {
+			filtered.Events = append(filtered.Events, event)
+		}
+	}
+
+	return
 }

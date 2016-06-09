@@ -1,0 +1,13 @@
+{
+    "strict": true,
+    "browser": true,
+    "jquery": true,
+    "globalstrict": true,
+    "globals": {
+        "Backbone": false,
+        "Mustache": false,
+        "_": false,
+        "console": false,
+        "goof": true
+    }
+}

@@ -1,29 +1,33 @@
-{{ define "calendar" }}
+<% define "calendar" %>
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-2">
-            <div class="panel panel-default">
-                <div class="panel-heading">Today</div>
-                <div class="panel-body"></div>
-            </div>
-        </div>
-        <div class="col-md-8">
-            <div class="panel panel-default">
-                <div class="panel-heading">Month</div>
-                <div class="panel-body">{{ template "calendar-multiweek" }}</div>
-            </div>
-        </div>
+
         <div class="col-md-2">
             <div class="panel panel-default">
                 <div class="panel-heading">Calendars</div>
                 <div class="panel-body">
                     <ul class="list-unstyled">
                         <li><span class="calendar-name calendar-name-1">calendar.ics</span></li>
-                        <li><span class="calendar-name calendar-name-2">other.ics</span></li>
+                        <li><span class="calendar-name calendar-name-2">placeholder.ics</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">Next events</div>
+                <div class="panel-body js-next-events">
+                    <ul class="list-unstyled">
+                        <li>
+                            <span class="calendar-name calendar-name-1">Placeholder</span>
+                        </li>
                     </ul>
                 </div>
             </div>
         </div>
+
+        <div class="col-md-10">
+            <div class="js-calendar-body"></div>
+        </div>
     </div>
 </div>
-{{ end }}
+<% end %>
