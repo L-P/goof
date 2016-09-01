@@ -1,5 +1,11 @@
 goof
 ====
+A web application to handle ICS calendars.  
+
+## Warning
+This application is far from ready, it is also the first Go code I ever wrote
+so it may not be pretty or idiomatic.
+
 ## Installation
 ### Prerequisites
 [Go](https://golang.org/) and [npm](https://www.npmjs.com/) are required to run
